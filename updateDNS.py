@@ -6,7 +6,7 @@ from optparse_mooi import CompactHelpFormatter
 from DNSChanger import DNSChanger
 from DNSRecord import DNSRecord
 
-def get_current_ip() -> requests.Response:
+def get_current_ip() -> str:
     response = requests.get("https://ipinfo.io/json", verify=True)
     return response.json()["ip"]
 
