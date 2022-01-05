@@ -6,9 +6,15 @@ from optparse_mooi import CompactHelpFormatter
 from DNSChanger import DNSChanger
 from DNSRecord import DNSRecord
 
-def get_current_ip() -> str:
-    response = requests.get("https://ipinfo.io/json", verify=True)
-    return response.json()["ip"]
+def get_current_ip(ip6: bool) -> str:
+    if not ip6:
+        response = requests.get("https://ipinfo.io/json", verify=True)
+        return response.json()["ip"]
+    else:
+        response = requests.get("https://ident.me", verify=True)
+        return response.text
+        
+    
 
 def options() -> Tuple:
     parser = optparse.OptionParser(formatter=CompactHelpFormatter())
@@ -23,6 +29,11 @@ def options() -> Tuple:
         action="store", dest="domain",
         type=str, 
         help="Your domain you want to update"
+    )
+    parser.add_option(
+        "-i", "--ipv6",
+        action="store_true", dest="ipv6", default=False,
+        help="Update your IPv6 adress"
     )
     parser.add_option(
         "-n", "--name",
@@ -50,6 +61,8 @@ def options() -> Tuple:
     if options.domain is None:
         print("ERROR: You have to specify a domain")
         exit()
+    if options.ipv6:
+        options.type = "AAAA"
 
     return options
 
@@ -69,7 +82,6 @@ def update(name: str, type: str, values: str, ttl: int, api_key: str, domain: st
         case 404:
             print("Record does not exist! Creating record...")
             r = dns.create_record()
-            print(r.text)
             if r.status_code == 201:
                 print("The specified record has been created successfully!")
             else:
@@ -85,5 +97,5 @@ def update(name: str, type: str, values: str, ttl: int, api_key: str, domain: st
 
 if __name__ == "__main__":
     opt = options()
-    my_ip = get_current_ip()
+    my_ip = get_current_ip(opt.ipv6)
     update(name=opt.name, type=opt.type, values=my_ip, ttl=opt.ttl, api_key=opt.api_key, domain=opt.domain)
