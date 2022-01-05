@@ -13,8 +13,6 @@ def get_current_ip(ip6: bool) -> str:
     else:
         response = requests.get("https://ident.me", verify=True)
         return response.text
-        
-    
 
 def options() -> Tuple:
     parser = optparse.OptionParser(formatter=CompactHelpFormatter())
@@ -33,7 +31,7 @@ def options() -> Tuple:
     parser.add_option(
         "-i", "--ipv6",
         action="store_true", dest="ipv6", default=False,
-        help="Update your IPv6 adress"
+        help="Enable IPv6"
     )
     parser.add_option(
         "-n", "--name",
@@ -42,16 +40,10 @@ def options() -> Tuple:
         help="Record Name. Default is '@'"
     )
     parser.add_option(
-        "-t", "--type",
-        action="store", dest="type",
-        type=str, default="A",
-        help="Record Type. Default is 'A'"
-    )
-    parser.add_option(
         "-l", "--ttl",
         action="store", dest="ttl",
         type=int, default=10800,
-        help="Record Time to Live. Default is 10800"
+        help="Record TTL. Default is 10800"
     )
     options, _ = parser.parse_args()
 
@@ -62,9 +54,10 @@ def options() -> Tuple:
         print("ERROR: You have to specify a domain")
         exit()
     if options.ipv6:
-        options.type = "AAAA"
-
-    return options
+        ip_type = "AAAA"
+    else:
+        ip_type = "A"
+    return options, ip_type
 
 def update(name: str, type: str, values: str, ttl: int, api_key: str, domain: str) -> None:
     rec = DNSRecord(name, type, values=[values])
@@ -96,6 +89,6 @@ def update(name: str, type: str, values: str, ttl: int, api_key: str, domain: st
 
 
 if __name__ == "__main__":
-    opt = options()
+    opt, ip_type = options()
     my_ip = get_current_ip(opt.ipv6)
-    update(name=opt.name, type=opt.type, values=my_ip, ttl=opt.ttl, api_key=opt.api_key, domain=opt.domain)
+    update(name=opt.name, type=ip_type, values=my_ip, ttl=opt.ttl, api_key=opt.api_key, domain=opt.domain)
