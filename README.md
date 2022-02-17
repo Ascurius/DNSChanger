@@ -4,7 +4,7 @@ This tool is used for updating the DNS records of your domain at Gandi.net.
 
 ### Available Options
 
-```bash
+```
 updateDNS.py -h
 Usage: updateDNS.py [options]
 
